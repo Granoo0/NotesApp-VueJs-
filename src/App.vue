@@ -4,12 +4,17 @@ import { ref } from "vue";
 const toggleModal = ref(false);
 const newNote = ref("");
 const notes = ref([]);
+const errorMessage = ref(false);
 
 function getRandomColor() {
   return "hsl(" + Math.random() * 360 + ", 100%, 75%)";
 }
 
 const pushNote = () => {
+  if (newNote.value.length < 9) {
+    errorMessage.value = true;
+    return;
+  } else 
   notes.value.push({
     id: Math.floor(Math.random() * 99999999),
     text: newNote.value,
@@ -18,6 +23,7 @@ const pushNote = () => {
   });
   toggleModal.value = false;
   newNote.value = "";
+  errorMessage.value = false;
 };
 </script>
 
@@ -31,8 +37,9 @@ const pushNote = () => {
           id="notes"
           cols="30"
           rows="10"
-          v-model="newNote"
+          v-model.trim="newNote"
         ></textarea>
+        <p class="error_msg" v-if="errorMessage">The note must be at least 10 characters long!</p>
         <button class="modal_btn" @click="pushNote">Add note</button>
       </div>
     </div>
@@ -42,9 +49,14 @@ const pushNote = () => {
         <button class="header_btn" @click="toggleModal = true">+</button>
       </header>
       <div class="cards-container">
-        <div class="card" v-for="note in notes" :key="id">
-          <p class="main-text">Pariatur enim temporibus laborum!</p>
-          <p class="date">02/05/2023</p>
+        <div
+          class="card"
+          v-for="note in notes"
+          :key="note.id"
+          :style="{ backgroundColor: note.backgroundColor }"
+        >
+          <p class="main-text">{{ note.text }}</p>
+          <p class="date">{{ note.date.toLocaleDateString("en-EU") }}</p>
         </div>
       </div>
     </div>
@@ -96,18 +108,19 @@ h1 {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  /* margin: 0 20px 20px 0; */
+  color: rgb(49, 49, 49);
   margin-right: 20px;
   margin-bottom: 20px;
+  overflow: hidden;
 }
 
 .main-text {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 400;
 }
 
 .date {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: bold;
 }
 
@@ -165,5 +178,11 @@ textarea {
   font-size: 25px;
   resize: none;
   max-height: 200px;
+}
+
+.error_msg {
+  color: rgb(234, 12, 12);
+  font-size: 16px;
+  font-weight: 500;
 }
 </style>
